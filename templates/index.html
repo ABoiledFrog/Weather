@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+
+<!-- Head -->
+<head>
+
+<title>雾霾&天气</title>
+
+<!-- For-Mobile-Apps -->
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="keywords" content="" />
+<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+<!-- //For-Mobile-Apps -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Style --> <link rel="stylesheet" href="static/css/style.css" type="text/css" media="all" />
+
+<!-- Web-Fonts -->
+<link href='http://fonts.useso.com/css?family=Oxygen:400,300,700' rel='stylesheet' type='text/css'>
+<link href='http://fonts.useso.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+<link href='http://fonts.useso.com/css?family=Raleway:100,200' rel='stylesheet' type='text/css'>
+<!-- //Web-Fonts -->
+
+</head>
+<!-- Head -->
+
+
+
+<!-- Body -->
+<body onload="startTime()">
+
+
+
+	<!-- Heading -->
+	<h1>雾霾&天气</h1>
+	<!-- //Headng -->
+
+
+
+		<!-- Container -->
+		<div class="container">
+
+			<!-- City -->
+			<div class="city">
+				<div class="title">
+					<h2>{{ response_data.city }}</h2>
+				</div>
+				<div class="date-time">
+					<div class="dmy">
+						<div id="txt"></div>
+						<div class="date">
+							<!-- Date-JavaScript -->
+							<script type="text/javascript">
+							var mydate=new Date()
+							var year=mydate.getYear()
+							if(year<1000)
+							year+=1900
+							var day=mydate.getDay()
+							var month=mydate.getMonth()
+							var daym=mydate.getDate()
+							if(daym<10)
+							daym="0"+daym
+							var dayarray = new Array("星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六");
+                            var montharray = new Array("一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月");
+                            document.write(""+dayarray[day]+", "+montharray[month]+" "+daym+", "+year+"")
+							</script>
+							<!-- //Date-JavaScript -->
+						</div>
+					</div>
+					<div class="temperature">
+						<p>{{ response_data.temp }}°C</p>
+					</div>
+					<div class="clear"></div>
+				</div>
+			</div>
+			<!-- //City -->
+
+
+
+			<!-- Forecast -->
+			<div class="forecast">
+				<div class="forecast-icon">
+                    {% if '晴' in response_data.weather %}
+                        <img src="static/images/sun.png" alt="晴">
+                    {% elif '雨' in response_data.weather %}
+                        <img src="static/images/rain.png" alt="雨">
+                    {% else %}
+                        <img src="static/images/cloud.png" alt="云">
+                    {% endif %}
+                </div>
+
+                <div class="today-weather">
+                    <h3>{{ response_data.weather }}</h3>
+                    <ul>
+                        <li>温度 <span>{{ response_data.temp }}°C</span></li>
+                        <li>湿度 <span>{{ response_data.humidity }}%</span></li>
+                        <li>空气质量 <span>{{ response_data.air_quality }}</span></li>
+                    </ul>
+                </div>
+
+			</div>
+			<!-- //Forecast -->
+            <!-- Charts -->
+
+            <!-- //Charts -->
+			<div class="clear"></div>
+
+
+
+		</div>
+		<!-- //Container -->
+        <div class="container">
+            <div class="charts">
+                <canvas id="weatherChart"></canvas>
+            </div>
+        </div>
+
+
+
+	<!-- Footer -->
+	<div class="footer">
+
+		<!-- Copyright -->
+		<div class="copyright">
+			<p>Copyright &copy; 2472组</p>
+		</div>
+		<!-- //Copyright -->
+
+	</div>
+	<!-- //Footer -->
+
+
+
+	<!-- Custom-JavaScript-Files -->
+
+		<!-- Time-JavaScript -->
+		<script>
+			function startTime() {
+				var today = new Date();
+				var h = today.getHours();
+				var m = today.getMinutes();
+				var s = today.getSeconds();
+				m = checkTime(m);
+				s = checkTime(s);
+				document.getElementById('txt').innerHTML =
+				h + ":" + m + ":" + s;
+				var t = setTimeout(startTime, 500);
+				}
+				function checkTime(i) {
+				if (i < 10) {i = "0" + i}; // add zero in front of numbers < 10
+				return i;
+			}
+		</script>
+		<!-- //Time-JavaScript -->
+
+	<!-- //Custom-JavaScript-File-Links -->
+        <script>
+        // 假设您的温度和湿度数据如下
+        var response_data = {{ response_data | tojson }};
+        var temperatureData = response_data.t24;
+        var humidityData = response_data.h24;
+
+        var labels = ['当前', '1h', '2h', '3h', '4h', '5h', '6h', '7h', '8h'];
+
+        var weatherData = {
+            labels: labels,
+            datasets: [
+                {
+                    label: '温度 (°C)',
+                    data: temperatureData,
+                    borderColor: 'rgba(0, 123, 255, 1)',
+                    borderWidth: 1,
+                    fill: false,
+                    yAxisID: 'y-axis-1',
+                    type: 'line'
+                },
+                {
+                    label: '湿度 (%)',
+                    data: humidityData,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                    fill: false,
+                    yAxisID: 'y-axis-2',
+                    type: 'line'
+                }
+            ]
+        };
+
+        var ctx = document.getElementById('weatherChart').getContext('2d');
+
+        var weatherChart = new Chart(ctx, {
+            type: 'line',
+            data: weatherData,
+            options: {
+                responsive: true,
+                hoverMode: 'index',
+                stacked: false,
+                title: {
+                    display: true,
+                    text: '温度和湿度变化'
+                },
+                scales: {
+                    yAxes: [
+                        {
+                            type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+                            display: true,
+                            position: 'left',
+                            id: 'y-axis-1',
+                        },
+                        {
+                            type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+                            display: true,
+                            position: 'right',
+                            id: 'y-axis-2',
+                            gridLines: {
+                                drawOnChartArea: false // only want the grid lines for one axis to show up
+                            }
+                        }
+                    ]
+                }
+            }
+        });
+        </script>
+
+</body>
+</html>
